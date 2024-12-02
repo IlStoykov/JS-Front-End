@@ -6,6 +6,7 @@ function solve(){
     const amountInputElement = document.getElementById('amount');
     const dateInputElement = document.getElementById('date');
     const previewList = document.getElementById('preview-list');
+    const expenceList = document.getElementById('expenses-list');
     
 
     addBtnElement.addEventListener('click', () => {
@@ -27,8 +28,11 @@ function solve(){
         //clear all wallet fields
         filedsCliner(expenseInputElement, amountInputElement, dateInputElement);
 
+        // take edit and ok buttons
+        const editBtn = expenseLiElement.querySelector('.btn.edit');
+        const okBtn = document.querySelector('.btn.ok');
+        
         //return information from Preview to input fields and clear buttons
-        const editBtn = expenseLiElement.querySelector('.btn.edit');// check if use liExpenseElement
         editBtn.addEventListener('click', () => 
         {
             expenseInputElement.value = expense;
@@ -39,6 +43,11 @@ function solve(){
             clearexpenseLiElement(expencesContainer);
             
             addBtnElement.disabled = false;            
+        })
+
+        okBtn.addEventListener('click', () => {
+            console.log('addBtn');
+
         })
 
     });
