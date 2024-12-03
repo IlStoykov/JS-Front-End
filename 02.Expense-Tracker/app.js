@@ -7,6 +7,7 @@ function solve(){
     const dateInputElement = document.getElementById('date');
     const previewList = document.getElementById('preview-list');
     const expenceList = document.getElementById('expenses-list');
+    const delBtnElement = document.querySelector('.btn.delete');
     
 
     addBtnElement.addEventListener('click', () => {
@@ -46,9 +47,17 @@ function solve(){
         })
 
         okBtn.addEventListener('click', () => {
-            console.log('addBtn');
-
+            const buttonsElements = expenseLiElement.querySelector('.buttons');
+            if(buttonsElements){
+                expenseLiElement.removeChild(buttonsElements);
+            }
+            expenceList.appendChild(expenseLiElement);
+            addBtnElement.disabled = true;
         })
+
+        delBtnElement.addEventListener('click', () => {
+            location.reload();
+        });
 
     });
     function createArticleElement(expense, amount, date){
