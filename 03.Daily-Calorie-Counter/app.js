@@ -8,6 +8,8 @@ const foodInputElement = document.getElementById('food');
 const timeInputElement = document.getElementById('time');
 const caloriesInputElement = document.getElementById('calories');
 
+let currentMealID = null;
+
 const loadMeaAllMeals = async() => {
     //Fetch all meals
     const response = await fetch(baseUrl);
@@ -49,16 +51,35 @@ const loadMeaAllMeals = async() => {
 
         // attach meal to dom
         listElement.appendChild(mealContainerElement);
+
+        changeBtnElement.addEventListener('click', ()=>{
+            // get data and populate to input fields
+            foodInputElement.value = meal.food;
+            caloriesInputElement.value = meal.calories;
+            timeInputElement.value = meal.time;
+
+            // set ID selcted meal
+
+            currentMealID = meal._id;
+            
+            //activate edit button 
+            editMealBtn.disabled = false;
+            // deactivate add button
+            addMealBtn.disabled = true;
+
+            // remove meal from list
+            mealContainerElement.remove();
+        })
+
     }
+
 };
 
 loadBtnElement.addEventListener('click', loadMeaAllMeals);
 
 addMealBtn.addEventListener('click', async () =>{
-    // get input fields data
-    const food = foodInputElement.value;
-    const time = timeInputElement.value;
-    const calories = caloriesInputElement.value;
+    // get input fields data    
+    const newMealData = getInputData();
 
     //POST reùest to create new resource on the server
     const response = await fetch(baseUrl, {
@@ -67,7 +88,7 @@ addMealBtn.addEventListener('click', async () =>{
             'content-type':'application/json',
         },
         body: JSON.stringify({
-            food, time, calories        
+            newMealData        
         }),
     });
     if(!response.ok){
@@ -75,9 +96,49 @@ addMealBtn.addEventListener('click', async () =>{
     }
     // load all meals
     await loadMeaAllMeals();
+    clearInputFields();
+}); 
 
-    //clear all fields
-    food.textContent = '';
-    time.textContent = '';
-    calories.textContent = '';
-});  
+editMealBtn.addEventListener(click, async() => {
+    // get data from input fields
+    const {food, calories, time} = getInputData();
+    
+    // make a PUT request 
+
+    const response = await fetch(`${baseUrl}/${currentMealID}`,{
+        method: 'PUT',
+        headers: {
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            _id: currentMealID, food, calories, time,
+        })
+
+    });
+    if(!response.ok){
+        return;
+    }
+    // load all meals
+    loadMeaAllMeals();
+
+    //deactivate edit button
+    editMealBtn.desabled = true;
+
+    //activate add meal button
+    addMealBtn.disabled = false;
+
+    // clear currentMealID
+    currentMealID = null;
+})
+function clearInputFields(){
+    return (food.value = '',
+    time.value = '',
+    calories.value = '');
+}
+
+function getInputData(){
+    const food = foodInputElement.value;
+    const time = timeInputElement.value;
+    const calories = caloriesInputElement.value;
+    return {food, time, calories};
+}
