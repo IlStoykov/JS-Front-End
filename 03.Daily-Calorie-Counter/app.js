@@ -66,40 +66,60 @@ const loadMeaAllMeals = async() => {
             editMealBtn.disabled = false;
             // deactivate add button
             addMealBtn.disabled = true;
-
             // remove meal from list
             mealContainerElement.remove();
+        });
+        deletBtnElement.addEventListener('click', async ()=>{
+            try{
+                const record = await fetch(`${baseUrl}/${meal._id}`, {
+                    method: "DELETE"
+                })
+                await loadMeaAllMeals();
+            }
+            catch{
+                throw new Error(`Failed to delete meal with name ${meal.food}`);
+            }            
         })
-
     }
-
 };
 
 loadBtnElement.addEventListener('click', loadMeaAllMeals);
 
-addMealBtn.addEventListener('click', async () =>{
-    // get input fields data    
-    const newMealData = getInputData();
+addMealBtn.addEventListener('click', async () => {
+    // Get data from input fields
+    const { food, time, calories } = getInputData();
 
-    //POST reùest to create new resource on the server
-    const response = await fetch(baseUrl, {
-        method: 'POST',
-        headers: {
-            'content-type':'application/json',
-        },
-        body: JSON.stringify({
-            newMealData        
-        }),
-    });
-    if(!response.ok){
+    // Validate input fields are not empty
+    if (!food || !time || !calories) {
+        alert('All fields are required!');
         return;
     }
-    // load all meals
-    await loadMeaAllMeals();
-    clearInputFields();
-}); 
 
-editMealBtn.addEventListener(click, async() => {
+    // Send a POST request to create a new meal
+    try {
+        const response = await fetch(baseUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ food, time, calories }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add meal');
+        }
+
+        // Reload all meals
+        await loadMeaAllMeals();
+
+        // Clear input fields
+        clearInputFields();
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+editMealBtn.addEventListener('click', async() => {
     // get data from input fields
     const {food, calories, time} = getInputData();
     
@@ -129,6 +149,7 @@ editMealBtn.addEventListener(click, async() => {
 
     // clear currentMealID
     currentMealID = null;
+    clearInputFields();
 })
 function clearInputFields(){
     return (food.value = '',
@@ -136,9 +157,9 @@ function clearInputFields(){
     calories.value = '');
 }
 
-function getInputData(){
-    const food = foodInputElement.value;
-    const time = timeInputElement.value;
-    const calories = caloriesInputElement.value;
-    return {food, time, calories};
+function getInputData() {
+    const food = foodInputElement.value.trim();
+    const time = timeInputElement.value.trim();
+    const calories = caloriesInputElement.value.trim();
+    return { food, time, calories };
 }
