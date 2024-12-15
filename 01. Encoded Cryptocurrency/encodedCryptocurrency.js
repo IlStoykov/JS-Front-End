@@ -1,41 +1,43 @@
 function solve(input){
-    let result = '';
+    
     let workString = input.shift();
     let commandLine = input.shift();
     while(commandLine != 'Buy'){
+        let result = '';
         const [command, substring, replacement] = commandLine.split('?');
         
         switch(command){
-            case 'TakeEven':
-                for(const i = 0; i < result.length; i++){
-                    if(i % 2===0){
+            case 'TakeEven':                
+                for(let i = 0; i < workString.length; i++){
+                    if(i % 2==0){
                         result += workString[i];
                     }
                 }
-                workString = result;
-                console.log(workString);
+                workString = result;       
                 break;
 
-            case 'ChangeAll':                
-                workString = workString.replace(substring, replacement);
-                console.log(workString);
+            case 'ChangeAll':
+                while(workString.includes(substring)){
+                    workString = workString.replace(substring, replacement);
+                };                                  
                 break;
             
             case 'Reverse':
                 const index = workString.indexOf(substring);
-                if(index != -1){
-                    let revSubstring = substring.split('').reverse().join('');
-                    workString = workString.replace(substring, '')+revSubstring;
-                    console.log(workString);
+                if(index == -1){
+                    console.log("error");                
                 }
                 else{
-                    console.log("error");
+                    let revSubstring = substring.split('').reverse().join('');
+                    workString = workString.replace(substring, '')+revSubstring;                   
                 }
                 break;                                    
-            }       
+            }
+            console.log(workString)        
         
         commandLine = input.shift();
     }
+    console.log(`The cryptocurrency is: ${workString}`);
 }
 solve(["PZDfA2PkAsakhnefZ7aZ", 
 "TakeEven",
@@ -45,3 +47,13 @@ solve(["PZDfA2PkAsakhnefZ7aZ",
 "ChangeAll?A?R",
 "Reverse?PRX",
 "Buy"]);
+solve(["z2tdsfndoctsB6z7tjc8ojzdngzhtjsyVjek!snfzsafhscs", 
+"TakeEven",
+"Reverse?!nzahc",
+"ChangeAll?m?g",
+"Reverse?adshk",
+"ChangeAll?z?i",
+"Buy"]);
+
+
+
