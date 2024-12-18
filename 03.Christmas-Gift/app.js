@@ -2,16 +2,17 @@ const baseUrl = 'http://localhost:3030/jsonstore/gifts';
 const loadPresentsBtn = document.getElementById('load-presents');
 const giftListElement = document.getElementById('gift-list');
 const addPresentBtn = document.getElementById('add-present');
+const editPresentBtn = document.getElementById('edit-present');
 
 const giftInputField = document.getElementById('gift');
 const forInputFieeld = document.getElementById('for');
 const priceInputField = document.getElementById('price');
 
-
+let currentId = null;
 
 const loadPresentsFunction = async ()=>{
-    response = await fetch(baseUrl),
-    data = await response.json();
+    const response = await fetch(baseUrl),
+    const data = await response.json();
     giftListElement.innerHTML = '';
 
     for(gift of Object.values(data)){
@@ -22,6 +23,16 @@ const loadPresentsFunction = async ()=>{
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('delete-btn');
         deleteBtn.textContent = 'Delete';
+
+        // add event Listner for change Btn
+        attachChangeListener(changeBtn, gift);
+
+        // add event Listener for delete Btn
+
+        deleteBtn.addEventListener('click', async () => {
+            await fetch(`${baseUrl}/${gift._id}`, {method: 'DELETE'});
+            await loadPresentsFunction();
+        });
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('buttons-container');
@@ -51,6 +62,42 @@ const loadPresentsFunction = async ()=>{
         giftListElement.appendChild(holeGiftElement);
     }
 };
+//Change Btn Function descrip
+
+const attachChangeListener = (changeBtn, gift) => {
+    changeBtn.addEventListener('click', ()=>{
+        giftInputField.value = gift.gift;
+        forInputFieeld.value = gift.for;
+        priceInputField.value = gift.price;
+
+        editPresentBtn.disabled = false;
+        addPresentBtn.disabled = true;
+
+        currentId = gift._id;
+    })
+};
+
+//Edit present functionality
+editPresentBtn.addEventListener('click', async () => {
+    const updatedGift = {
+        gift: giftInputField.value.trim(),
+        for: forInputFieeld.value.trim(),
+        price: priceInputField.trim()
+    };
+    if(!giftInputField || !forInputFieeld || !priceInputField){
+        alert('All fields are rquired!');
+        return;
+    };
+    // sent PUT request
+    await fetch(`${baseUrl}/${currentId}`,{
+        method: 'PUT',
+        headers:{'content-type': 'application/json'},
+        method: JSON.stringify(updatedGift)
+    });
+    //reload presents and cler firlds
+    await loadPresentsFunction();
+    clearFields();
+})
 
 loadPresentsBtn.addEventListener('click', loadPresentsFunction);
 addPresentBtn.addEventListener('click', async ()=>{
@@ -65,6 +112,7 @@ addPresentBtn.addEventListener('click', async ()=>{
         body: JSON.stringify(newPresent),
     });
     if(!response.ok){
+        alert('All fields are required!');  
         return;
     }
     await loadPresentsFunction();
